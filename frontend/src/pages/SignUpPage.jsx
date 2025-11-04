@@ -10,6 +10,8 @@ import { MdDriveFileRenameOutline } from "react-icons/md";
 import { baseURL } from "../constant/url.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
+
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -128,7 +130,7 @@ const SignUpPage = () => {
             />
           </label>
           <button className="btn rounded-full btn-primary text-white">
-            {isPending ? "Creating account..." : "Sign up"}
+            {isPending ? <LoadingSpinner /> : "Sign up"}
           </button>
           {isError && <p className="text-red-500">{error.message}</p>}
         </form>

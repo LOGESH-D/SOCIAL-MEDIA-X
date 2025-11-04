@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 
 import XSvg from "../assets/X.jsx";
 
-import { MdOutlineMail } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
-
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { baseURL } from "../constant/url.js";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -15,46 +17,47 @@ const LoginPage = () => {
   });
   // const queryClient = useQueryClient();
 
-  // const {
-  //   mutate: loginMutation,
-  //   isPending,
-  //   isError,
-  //   error,
-  // } = useMutation({
-  //   mutationFn: async ({ username, password }) => {
-  //     try {
-  //       const res = await fetch("/api/auth/login", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ username, password }),
-  //       });
+  const {
+    mutate: login,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: async ({ username, password }) => {
+      try {
+        const res = await fetch(`${baseURL}/api/auth/login`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        });
 
-  //       const data = await res.json();
+        const data = await res.json();
 
-  //       if (!res.ok) {
-  //         throw new Error(data.error || "Something went wrong");
-  //       }
-  //     } catch (error) {
-  //       throw new Error(error);
-  //     }
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["authUser"] });
-  //   },
-  // });
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Logged in successfully");
+      // queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    login(formData);
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const isError = false;
 
   return (
     <div className="max-w-7xl mx-auto flex h-screen">
@@ -74,7 +77,7 @@ const LoginPage = () => {
 
           {/* Username */}
           <label className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition">
-            <MdOutlineMail className="text-gray-400" />
+            <FaUser className="text-gray-400" />
             <input
               type="text"
               className="bg-transparent outline-none text-white flex-1 placeholder-gray-400"
@@ -100,12 +103,11 @@ const LoginPage = () => {
 
           {/* Login button */}
           <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-full transition"
+            className="btn rounded-full btn-primary text-white"
           >
-            Login
+            {isPending ? <LoadingSpinner /> : "Log In"}
           </button>
-          {isError && <p className="text-red-500">Something went wrong</p>}
+          {isError && <p className="text-red-500">{error.message}</p>}
         </form>
 
         {/* Signup link */}
