@@ -15,7 +15,7 @@ import LoadingSpinner from "./LoadingSpinner";
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const postOwner = post.user;
   const isLiking = false;
   const isLiked = false;
@@ -24,7 +24,6 @@ const Post = ({ post }) => {
 
   const formattedDate = "1h";
   const isCommenting = false;
-  // const isDeleting = false;
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
