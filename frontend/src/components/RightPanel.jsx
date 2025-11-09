@@ -1,34 +1,43 @@
 import { Link } from "react-router-dom";
-// import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { baseURL } from "../constant/url.js";
 
-// import useFollow from "../../hooks/useFollow";
+import useFollow from "../hooks/useFollow.js";
 
 import RightPanelSkeleton from "../components/skeletons/RightPanelSkeleton.jsx";
-// import LoadingSpinner from "./LoadingSpinner";
-import { USERS_FOR_RIGHT_PANEL } from "../utils/dummy.js"
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 const RightPanel = () => {
-  // const { data: suggestedUsers, isLoading } = useQuery({
-  //   queryKey: ["suggestedUsers"],
-  //   queryFn: async () => {
-  //     try {
-  //       const res = await fetch("/api/users/suggested");
-  //       const data = await res.json();
-  //       if (!res.ok) {
-  //         throw new Error(data.error || "Something went wrong!");
-  //       }
-  //       return data;
-  //     } catch (error) {
-  //       throw new Error(error.message);
-  //     }
-  //   },
-  // });
+  const { data: suggestedUsers = [], isLoading } = useQuery({
+    queryKey: ["suggestedUsers"],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`${baseURL}/api/users/suggested`,{
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong!");
+        }
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data.suggestedUsers)) return data.suggestedUsers;
+        return [];
+        // return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  });
 
-  // const { follow, isPending } = useFollow();
+  const { follow, isPending } = useFollow();
 
-  // if (suggestedUsers?.length === 0) return <div className="md:w-64 w-0"></div>;
+  if (suggestedUsers?.length === 0) return <div className="md:w-64 w-0"></div>;
 
-  const isLoading = false;
+
   return (
     <div className="hidden lg:block my-4 mx-2">
       <div className="bg-[#16181C] p-4 rounded-md sticky top-2">
@@ -44,7 +53,7 @@ const RightPanel = () => {
             </>
           )}
           {!isLoading &&
-            USERS_FOR_RIGHT_PANEL?.map((user) => (
+            suggestedUsers?.map((user) => (
               <Link
                 to={`/profile/${user.username}`}
                 className="flex items-center justify-between gap-4"

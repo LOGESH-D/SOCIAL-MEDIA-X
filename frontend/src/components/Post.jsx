@@ -10,20 +10,18 @@ import { baseURL } from "../constant/url.js";
 import { toast } from "react-hot-toast";
 
 import LoadingSpinner from "./LoadingSpinner";
-// import { formatPostDate } from "../../utils/date";
+import { formatPostDate } from "../utils/date.js";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
   const postOwner = post.user;
-  const isLiking = false;
-  const isLiked = false;
+  const isLiked = post.likes.includes(authUser._id);
 
   const isMyPost = authUser._id === postOwner._id;
 
-  const formattedDate = "1h";
-  const isCommenting = false;
+  const formattedDate = formatPostDate(post.createdAt);
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -51,69 +49,72 @@ const Post = ({ post }) => {
     },
   });
 
-  //   const { mutate: likePost, isPending: isLiking } = useMutation({
-  //     mutationFn: async () => {
-  //       try {
-  //         const res = await fetch(`/api/posts/like/${post._id}`, {
-  //           method: "POST",
-  //         });
-  //         const data = await res.json();
-  //         if (!res.ok) {
-  //           throw new Error(data.error || "Something went wrong");
-  //         }
-  //         return data;
-  //       } catch (error) {
-  //         throw new Error(error);
-  //       }
-  //     },
-  //     onSuccess: (updatedLikes) => {
-  //       // this is not the best UX, bc it will refetch all posts
-  //       // queryClient.invalidateQueries({ queryKey: ["posts"] });
+  const { mutate: likePost, isPending: isLiking } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`${baseURL}/api/posts/like/${post._id}`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: (updatedLikes) => {
+      queryClient.setQueryData(["posts"], (oldData) => {
+        return oldData.map((p) => {
+          if (p._id === post._id) {
+            return { ...p, likes: updatedLikes };
+          }
+          return p;
+        });
+      });
+      toast.success("Post liked successfully");
+      // queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
-  //       // instead, update the cache directly for that post
-  //       queryClient.setQueryData(["posts"], (oldData) => {
-  //         return oldData.map((p) => {
-  //           if (p._id === post._id) {
-  //             return { ...p, likes: updatedLikes };
-  //           }
-  //           return p;
-  //         });
-  //       });
-  //     },
-  //     onError: (error) => {
-  //       toast.error(error.message);
-  //     },
-  //   });
+  const { mutate: commentPost, isPending: isCommenting } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`${baseURL}/api/posts/comment/${post._id}`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: comment }),
+        });
+        const data = await res.json();
 
-  //   const { mutate: commentPost, isPending: isCommenting } = useMutation({
-  //     mutationFn: async () => {
-  //       try {
-  //         const res = await fetch(`/api/posts/comment/${post._id}`, {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({ text: comment }),
-  //         });
-  //         const data = await res.json();
-
-  //         if (!res.ok) {
-  //           throw new Error(data.error || "Something went wrong");
-  //         }
-  //         return data;
-  //       } catch (error) {
-  //         throw new Error(error);
-  //       }
-  //     },
-  //     onSuccess: () => {
-  //       toast.success("Comment posted successfully");
-  //       setComment("");
-  //       queryClient.invalidateQueries({ queryKey: ["posts"] });
-  //     },
-  //     onError: (error) => {
-  //       toast.error(error.message);
-  //     },
-  //   });
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Comment posted successfully");
+      setComment("");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const handleDeletePost = () => {
     deletePost();
@@ -121,13 +122,13 @@ const Post = ({ post }) => {
 
   const handlePostComment = (e) => {
     e.preventDefault();
-    // if (isCommenting) return;
-    // commentPost();
+    if (isCommenting) return;
+    commentPost();
   };
 
   const handleLikePost = () => {
-    // if (isLiking) return;
-    // likePost();
+    if (isLiking) return;
+    likePost();
   };
 
   return (
