@@ -3,6 +3,12 @@
 
 # 🚀 L.MEDIA
 
+## 🖼️ Preview
+
+https://ld-media.onrender.com
+
+---
+
 A **full-featured Social Media Platform** built using the **MERN Stack (MongoDB, Express, React, Node.js)** with authentication, posts, comments, likes, and profile management.
 
 ---
