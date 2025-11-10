@@ -20,7 +20,7 @@ A **full-featured Social Media Platform** built using the **MERN Stack (MongoDB,
 ✅ **Comments & Replies** – Interactive comment section  
 ✅ **Follow System** – Follow/unfollow other users  
 ✅ **Profile Customization** – Update your bio, avatar, and more  
-✅ **Responsive UI** – Beautiful design with **Tailwind CSS + Daisyl UI**  
+✅ **Responsive UI** – Beautiful design with **Tailwind CSS + Daisy UI**  
 ✅ **Real-time Updates** – Powered by React Query & API integration  
 
 ---
