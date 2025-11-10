@@ -2,7 +2,6 @@ import Post from "./Post";
 import PostSkeleton from "../components/skeletons/PostSkeleton.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { POSTS } from "../utils/dummy.js";
 import { baseURL } from "../constant/url.js";
 
 const Posts = ({ feedType, username, userId }) => {
@@ -12,10 +11,10 @@ const Posts = ({ feedType, username, userId }) => {
         return `${baseURL}/api/posts/all`;
       case "following":
         return `${baseURL}/api/posts/following`;
-      //     case "posts":
-      //       return `${baseURL}/api/posts/user/${username}`;
-      //     case "likes":
-      //       return `${baseURL}/api/posts/likes/${userId}`;
+          case "posts":
+            return `${baseURL}/api/posts/user/${username}`;
+          case "likes":
+            return `${baseURL}/api/posts/likes/${userId}`;
       default:
         return `${baseURL}/api/posts/all`;
     }

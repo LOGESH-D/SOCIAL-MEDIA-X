@@ -12,7 +12,20 @@ const CreatePost = () => {
   const [img, setImg] = useState(null);
   const imgRef = useRef(null);
 
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      const res = await fetch(`${baseURL}/api/auth/me`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      return data;
+    },
+    retry: false,
+  });
   const queryClient = useQueryClient();
 
   const {
@@ -69,7 +82,10 @@ const CreatePost = () => {
     <div className="flex p-4 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
         <div className="w-8 rounded-full">
-          <img src={authUser.profileImg || "/avatar-placeholder.png"} />
+          <img
+            src={authUser?.profileImg || "/avatar-placeholder.png"}
+            alt={authUser?.username || "User"}
+          />
         </div>
       </div>
       <form className="flex flex-col gap-2 w-full" onSubmit={handleSubmit}>

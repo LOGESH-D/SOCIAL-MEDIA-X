@@ -3,83 +3,83 @@ import { Link, useParams } from "react-router-dom";
 
 import Posts from "../components/Posts.jsx";
 import ProfileHeaderSkeleton from "../components/skeletons/ProfileHeaderSkeleton.jsx";
-import EditProfileModal from "./EditProfileModal.jsx";
+import EditProfileModal from "../pages/EditProfileModal.jsx";
 
-import { POSTS } from "../utils/dummy.js";
+import { baseURL } from "../constant/url.js";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-// import { useQuery } from "@tanstack/react-query";
-// import { formatMemberSinceDate } from "../../utils/date";
+import { useQuery } from "@tanstack/react-query";
+import { formatMemberSinceDate } from "../utils/date";
 
-// import useFollow from "../../hooks/useFollow";
-// import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
+import useFollow from "../hooks/useFollow.js";
+import useUpdateUserProfile from "../hooks/useUpdateUserProfile.js";
+
+const UserPostCount = ({ username }) => {
+  const { data: count } = useQuery({
+    queryKey: ["userPostCount", username],
+    queryFn: async () => {
+      const res = await fetch(`${baseURL}/api/posts/user/${username}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) return 0;
+      return Array.isArray(data) ? data.length : 0;
+    },
+  });
+  return <span className="text-sm text-slate-500">{count || 0} posts</span>;
+};
+
+const normalizeLink = (link) => {
+  if (!link) return "";
+  const trimmed = link.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState("posts");
-   
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
-  // const { username } = useParams();
+  const { username } = useParams();
 
-  // const { follow, isPending } = useFollow();
-  // const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { follow, isPending } = useFollow();
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
-  // const {
-  //   data: user,
-  //   isLoading,
-  //   refetch,
-  //   isRefetching,
-  // } = useQuery({
-  //   queryKey: ["userProfile"],
-  //   queryFn: async () => {
-  //     try {
-  //       const res = await fetch(`/api/users/profile/${username}`);
-  //       const data = await res.json();
-  //       if (!res.ok) {
-  //         throw new Error(data.error || "Something went wrong");
-  //       }
-  //       return data;
-  //     } catch (error) {
-  //       throw new Error(error);
-  //     }
-  //   },
-  // });
+  const {
+    data: user,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`${baseURL}/api/users/profile/${username}`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        return data?.user || data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+  });
 
-  // const { isUpdatingProfile, updateProfile } = useUpdateUserProfile();
+  const { isUpdatingProfile, updateProfile } = useUpdateUserProfile();
 
-  // const isMyProfile = authUser._id === user?._id;
-  // const memberSinceDate = formatMemberSinceDate(user?.createdAt);
-  // const amIFollowing = authUser?.following.includes(user?._id);
-
-
-  const user = {
-    _id: "1",
-    fullName: "Logesh D",
-    username: "logesh_dev",
-    email: "logesh@example.com",
-    bio: "Final-year Computer Science student passionate about AI, React, and full-stack development.",
-    link: "https://github.com/logeshd",
-    location: "Chennai, India",
-    createdAt: "2023-05-20",
-    followers: ["u1", "u2", "u3"],
-    following: ["u4", "u5"],
-    coverImg: "/cover.png",
-    profileImg: "https://via.placeholder.com/150",
-  };
-
-  const isLoading = false;
-  const isRefetching = false;
-  const isMyProfile = true;
-  const authUser = user;
-  const memberSinceDate = "Joined May 2023";
-  const username = user.username;
+  const isMyProfile = authUser?._id === user?._id;
+  const memberSinceDate = formatMemberSinceDate(user?.createdAt);
+  const amIFollowing = authUser?.following?.includes(user?._id);
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
@@ -93,9 +93,9 @@ const ProfilePage = () => {
     }
   };
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [username, refetch]);
+  useEffect(() => {
+    refetch();
+  }, [username, refetch]);
 
   return (
     <>
@@ -113,10 +113,9 @@ const ProfilePage = () => {
                   <FaArrowLeft className="w-4 h-4" />
                 </Link>
                 <div className="flex flex-col">
-                  <p className="font-bold text-lg">{user?.fullName}</p>
-                  <span className="text-sm text-slate-500">
-                    {POSTS?.length} posts
-                  </span>
+                  <p className="font-bold text-lg">{user?.fullname}</p>
+                  {/* Post count now comes from backend via a lightweight query below */}
+                  <UserPostCount username={username} />
                 </div>
               </div>
               {/* COVER IMG */}
@@ -198,7 +197,7 @@ const ProfilePage = () => {
 
               <div className="flex flex-col gap-4 mt-14 px-4">
                 <div className="flex flex-col">
-                  <span className="font-bold text-lg">{user?.fullName}</span>
+                  <span className="font-bold text-lg">{user?.fullname}</span>
                   <span className="text-sm text-slate-500">
                     @{user?.username}
                   </span>
@@ -211,12 +210,11 @@ const ProfilePage = () => {
                       <>
                         <FaLink className="w-3 h-3 text-slate-500" />
                         <a
-                          href="https://youtube.com/@asaprogrammer_"
+                          href={normalizeLink(user?.link)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-sm text-blue-500 hover:underline"
                         >
-                          {/* Updated this after recording the video. I forgot to update this while recording, sorry, thx. */}
                           {user?.link}
                         </a>
                       </>
