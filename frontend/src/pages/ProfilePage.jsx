@@ -16,6 +16,7 @@ import { formatMemberSinceDate } from "../utils/date";
 
 import useFollow from "../hooks/useFollow.js";
 import useUpdateUserProfile from "../hooks/useUpdateUserProfile.js";
+import useAuthUser from "../hooks/useAuthUser.js";
 
 const UserPostCount = ({ username }) => {
   const { data: count } = useQuery({
@@ -50,7 +51,7 @@ const ProfilePage = () => {
   const { username } = useParams();
 
   const { follow, isPending } = useFollow();
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useAuthUser();
 
   const {
     data: user,

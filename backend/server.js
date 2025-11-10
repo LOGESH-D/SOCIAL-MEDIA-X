@@ -38,13 +38,12 @@ app.use("/api/notifications", notificationRoute);
 
 // if (process.env.NODE_ENV === "production"){
 //     app.use(express.static(path.join(__dirname, "/frontend/build")));
-//     app.use("*", (req,res) => {
+//     app.use("/*", (req,res) => {
 //         res.sendFile(path.resolve(__dirname, "frontend","build","index.html"));
 //     });
 // }
 
-    // "build": "npm install && npm install --include=dev --prefix frontend && npm run build --prefix frontend",
-
+    // "build": "npm install && npm install --include=dev --prefix frontend && npm run build --prefix frontend", 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     connectDB();
