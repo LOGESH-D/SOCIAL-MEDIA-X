@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import XSvg from "../assets/X.jsx";
+import { FaDragon } from "react-icons/fa";
 
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
@@ -63,7 +63,7 @@ const LoginPage = () => {
     <div className="max-w-7xl mx-auto flex h-screen">
       {/* Left side SVG */}
       <div className="flex-1 hidden lg:flex items-center justify-center">
-        <XSvg className="lg:w-2/3 fill-white" />
+        <FaDragon className="w-60 h-60 fill-white" />
       </div>
 
       {/* Right side form */}
@@ -72,7 +72,7 @@ const LoginPage = () => {
           className="flex gap-4 flex-col lg:w-2/3 md:mx-20 w-full"
           onSubmit={handleSubmit}
         >
-          <XSvg className="w-24 lg:hidden fill-white" />
+          <FaDragon className="w-24 lg:hidden fill-white" />
           <h1 className="text-4xl font-extrabold text-white">Let's go.</h1>
 
           {/* Username */}
@@ -102,9 +102,7 @@ const LoginPage = () => {
           </label>
 
           {/* Login button */}
-          <button
-            className="btn rounded-full btn-primary text-white"
-          >
+          <button className="btn rounded-full btn-primary text-white">
             {isPending ? <LoadingSpinner /> : "Log In"}
           </button>
           {isError && <p className="text-red-500">{error.message}</p>}
